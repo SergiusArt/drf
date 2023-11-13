@@ -1,4 +1,6 @@
 from django.db import models
+
+from config import settings
 from src.constants import NULLABLE
 from users.models import User
 
@@ -10,6 +12,13 @@ class Course(models.Model):
     description = models.TextField(verbose_name='описание', **NULLABLE)
     # дата и время создания курса
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата и время создания')
+    # привязка к пользователю
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='пользователь',
+        **NULLABLE
+    )
 
     def __str__(self):
         return self.name
@@ -17,13 +26,20 @@ class Course(models.Model):
 
 # Класс модели "Урок": курс, название, описание, превью (картинка), ссылка на видео
 class Lesson(models.Model):
-    course = models.ForeignKey('Course', on_delete=models.CASCADE, verbose_name='курс')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, verbose_name='курс', **NULLABLE)
     title = models.CharField(max_length=200, verbose_name='название')
     description = models.TextField(**NULLABLE, verbose_name='описание')
     preview = models.ImageField(upload_to='lesson', **NULLABLE, verbose_name='первью')
     video_url = models.URLField(**NULLABLE, verbose_name='видео')
     # дата и время создания урока
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата и время создания')
+    # привязка к пользователю
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='пользователь',
+        **NULLABLE
+    )
 
     def __str__(self):
         return self.title
