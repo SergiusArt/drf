@@ -15,6 +15,11 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def get_permissions(self):
+        if self.action in ['create', 'delete']:
+            self.permission_classes = [~ModeratorPermissions]
+        return super(CourseViewSet, self).get_permissions()
+
 
 # API для создания урока
 class LessonCreateAPIView(generics.ListCreateAPIView):
