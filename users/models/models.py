@@ -1,4 +1,6 @@
 from django.db import models
+
+from education.models import Course
 from src.constants import NULLABLE
 from django.contrib.auth.models import AbstractUser
 import uuid
@@ -41,3 +43,9 @@ class User(AbstractUser):
         # Генерируем уникальный код с помощью функции uuid4()
         self.verification_code = str(uuid.uuid4())[:8]
         super().save(*args, **kwargs)
+
+
+# Класс модели подписки
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, **NULLABLE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE)
