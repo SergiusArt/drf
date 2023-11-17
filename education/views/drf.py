@@ -1,15 +1,14 @@
 from rest_framework import viewsets, generics, filters
 from education import serializers
 from education.models import Course, Lesson, Payment
-from education.serializers import PaymentSerializer
+from education.serializers import PaymentSerializer, SubscriptionSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from users.models import ModeratorPermissions, IsOwner
+from users.models import ModeratorPermissions, IsOwner, Subscription
 
 
 # ViewSet для модели Course
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CourseSerializer
-    queryset = Course.objects.all()
     permission_classes = [ModeratorPermissions | IsOwner]
 
     def perform_create(self, serializer):
@@ -18,13 +17,20 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'delete']:
             self.permission_classes = [~ModeratorPermissions]
+        # Редактировать и просматривать могут только модераторы и владельцы
+        if self.action in ['update', 'view']:
+            self.permission_classes = [ModeratorPermissions | IsOwner]
         return super(CourseViewSet, self).get_permissions()
+
+    def get_queryset(self):
+        user = self.request.user
+        return Course.objects.filter(owner=user).order_by('id')
 
 
 # API для создания урока
 class LessonCreateAPIView(generics.ListCreateAPIView):
     serializer_class = serializers.LessonSerializer
-    queryset = Lesson.objects.all()
+    queryset = Lesson.objects.order_by('id')
     permission_classes = [~ModeratorPermissions]
 
     def perform_create(self, serializer):
@@ -34,7 +40,7 @@ class LessonCreateAPIView(generics.ListCreateAPIView):
 # API для получения списка уроков
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = serializers.LessonSerializer
-    queryset = Lesson.objects.all()
+    queryset = Lesson.objects.order_by('id')
     permission_classes = [ModeratorPermissions | IsOwner]
 
 
@@ -55,7 +61,7 @@ class LessonUpdateAPIView(generics.RetrieveUpdateAPIView):
 # API для удаления урока
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [~ModeratorPermissions]
+    permission_classes = [~ModeratorPermissions | IsOwner]
 
 
 # API для получения списка платежей
@@ -66,5 +72,13 @@ class PaymentListAPIView(generics.ListAPIView):
     ordering_fields = ['payment_date']
     filterset_fields = ['course', 'lesson', 'payment_method']
     permission_classes = [ModeratorPermissions | IsOwner]
+
+
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 

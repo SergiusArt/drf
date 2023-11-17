@@ -2,7 +2,7 @@ from django.db import models
 
 from config import settings
 from src.constants import NULLABLE
-from users.models import User
+from django.conf import settings
 
 
 # Класс модели "Курс": название, превью (картинка), описание
@@ -47,7 +47,7 @@ class Lesson(models.Model):
 
 # Класс модели платежей
 class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='пользователь', **NULLABLE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='пользователь', **NULLABLE)
     payment_date = models.DateField(verbose_name='дата оплаты', auto_now_add=True)
     # оплаченный курс
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='курс', **NULLABLE)
