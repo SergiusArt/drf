@@ -15,10 +15,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
     def get_permissions(self):
-        if self.action in ['create', 'delete']:
+        if self.action in ['create', 'destroy']:
             self.permission_classes = [~ModeratorPermissions]
         # Редактировать и просматривать могут только модераторы и владельцы
-        if self.action in ['update', 'view']:
+        if self.action in ['update', 'retrieve']:
             self.permission_classes = [ModeratorPermissions | IsOwner]
         return super(CourseViewSet, self).get_permissions()
 
