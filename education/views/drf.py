@@ -8,6 +8,28 @@ from users.models import ModeratorPermissions, IsOwner, Subscription
 
 # ViewSet для модели Course
 class CourseViewSet(viewsets.ModelViewSet):
+    """
+    API для работы с курсами.
+
+    Разрешения:
+    - Создание и удаление курса доступно только модераторам.
+    - Редактирование и просмотр доступны только модераторам и владельцам курса.
+
+    Поля:
+    - serializer_class: Класс сериализатора для курса.
+    - permission_classes: Классы разрешений для доступа к API.
+    - perform_create: Метод для сохранения владельца курса при создании.
+
+    Методы:
+    - get_permissions: Переопределенный метод для настройки разрешений в зависимости от действия.
+
+    Запросы:
+    - GET: Получение списка курсов.
+    - POST: Создание нового курса.
+    - GET (/:id): Получение конкретного курса.
+    - PUT (/:id): Обновление информации о курсе.
+    - DELETE (/:id): Удаление курса.
+    """
     serializer_class = serializers.CourseSerializer
     permission_classes = [ModeratorPermissions | IsOwner]
 
@@ -29,6 +51,22 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 # API для создания урока
 class LessonCreateAPIView(generics.ListCreateAPIView):
+    """
+    API для создания урока.
+
+    Разрешения:
+    - Создание доступно только пользователям, не являющимся модераторами.
+
+    Поля:
+    - serializer_class: Класс сериализатора для урока.
+    - queryset: Запрос для получения списка уроков.
+    - permission_classes: Классы разрешений для доступа к API.
+    - perform_create: Метод для сохранения владельца урока при создании.
+
+    Запросы:
+    - GET: Получение списка уроков.
+    - POST: Создание нового урока.
+    """
     serializer_class = serializers.LessonSerializer
     queryset = Lesson.objects.order_by('id')
     permission_classes = [~ModeratorPermissions]
@@ -39,6 +77,20 @@ class LessonCreateAPIView(generics.ListCreateAPIView):
 
 # API для получения списка уроков
 class LessonListAPIView(generics.ListAPIView):
+    """
+    API для получения списка уроков.
+
+    Разрешения:
+    - Просмотр доступен только модераторам и владельцам уроков.
+
+    Поля:
+    - serializer_class: Класс сериализатора для урока.
+    - queryset: Запрос для получения списка уроков.
+    - permission_classes: Классы разрешений для доступа к API.
+
+    Запросы:
+    - GET: Получение списка уроков.
+    """
     serializer_class = serializers.LessonSerializer
     queryset = Lesson.objects.order_by('id')
     permission_classes = [ModeratorPermissions | IsOwner]
@@ -46,6 +98,20 @@ class LessonListAPIView(generics.ListAPIView):
 
 # API для получения конкретного урока
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
+    """
+    API для получения конкретного урока.
+
+    Разрешения:
+    - Просмотр доступен только модераторам и владельцам уроков.
+
+    Поля:
+    - serializer_class: Класс сериализатора для урока.
+    - queryset: Запрос для получения всех уроков.
+    - permission_classes: Классы разрешений для доступа к API.
+
+    Запросы:
+    - GET: Получение конкретного урока.
+    """
     serializer_class = serializers.LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [ModeratorPermissions | IsOwner]
@@ -53,6 +119,21 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
 
 # API для обновления урока
 class LessonUpdateAPIView(generics.RetrieveUpdateAPIView):
+    """
+    API для обновления урока.
+
+    Разрешения:
+    - Редактирование доступно только модераторам и владельцам уроков.
+
+    Поля:
+    - serializer_class: Класс сериализатора для урока.
+    - queryset: Запрос для получения всех уроков.
+    - permission_classes: Классы разрешений для доступа к API.
+
+    Запросы:
+    - GET: Получение конкретного урока.
+    - PUT: Обновление информации о уроке.
+    """
     serializer_class = serializers.LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [ModeratorPermissions | IsOwner]
@@ -60,12 +141,42 @@ class LessonUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 # API для удаления урока
 class LessonDestroyAPIView(generics.DestroyAPIView):
+    """
+    API для удаления урока.
+
+    Разрешения:
+    - Удаление доступно только модераторам и владельцам уроков.
+
+    Поля:
+    - queryset: Запрос для получения всех уроков.
+    - permission_classes: Классы разрешений для доступа к API.
+
+    Запросы:
+    - DELETE: Удаление урока.
+    """
     queryset = Lesson.objects.all()
     permission_classes = [~ModeratorPermissions | IsOwner]
 
 
 # API для получения списка платежей
 class PaymentListAPIView(generics.ListAPIView):
+    """
+    API для получения списка платежей.
+
+    Разрешения:
+    - Просмотр доступен только модераторам и владельцам платежей.
+
+    Поля:
+    - serializer_class: Класс сериализатора для платежа.
+    - queryset: Запрос для получения всех платежей.
+    - filter_backends: Классы фильтрации и сортировки.
+    - ordering_fields: Поля, по которым можно сортировать.
+    - filterset_fields: Поля, по которым можно фильтровать.
+    - permission_classes: Классы разрешений для доступа к API.
+
+    Запросы:
+    - GET: Получение списка платежей.
+    """
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
@@ -75,6 +186,27 @@ class PaymentListAPIView(generics.ListAPIView):
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
+    """
+    API для работы с подписками.
+
+    Разрешения:
+    - Создание, редактирование, просмотр и удаление доступны только пользователям.
+
+    Поля:
+    - queryset: Запрос для получения всех подписок.
+    - serializer_class: Класс сериализатора для подписки.
+    - perform_create: Метод для сохранения пользователя при создании.
+
+    Методы:
+    - get_permissions: Переопределенный метод для настройки разрешений в зависимости от действия.
+
+    Запросы:
+    - GET: Получение списка подписок.
+    - POST: Создание новой подписки.
+    - GET (/:id): Получение конкретной подписки.
+    - PUT (/:id): Обновление информации о подписке.
+    - DELETE (/:id): Удаление подписки.
+    """
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
 

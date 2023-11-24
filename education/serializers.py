@@ -1,6 +1,6 @@
 import re
 from rest_framework import serializers
-
+import stripe
 from education.models import Course, Lesson, Payment
 from users.models import Subscription
 
@@ -33,6 +33,45 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_lesson_count(self, obj):
         return obj.lesson_set.count()
+
+    def to_representation(self, instance):
+        # Получаем представление экземпляра с помощью родительского метода
+        representation = super().to_representation(instance)
+
+        # Устанавливаем ключ API для stripe
+        stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+
+        # Создаем цену для продукта с помощью stripe
+        response_price = stripe.Price.create(
+            unit_amount=22222,
+            currency="usd",
+            recurring={"interval": "year"},
+            product="prod_P13LoGhQ2EHrYU",
+        )
+
+        # Получаем ID цены
+        price_id = response_price['id']
+
+        # Создаем сессию оплаты с помощью stripe
+        response_session = stripe.checkout.Session.create(
+            success_url="https://example.com/success",
+            line_items=[
+                {
+                    "price": price_id,
+                    "quantity": 2,
+                },
+            ],
+            mode="subscription",
+        )
+
+        # Получаем URL для оплаты
+        pay_url = response_session['url']
+
+        # Добавляем ссылку на оплату в представление
+        representation['payment_link'] = pay_url
+
+        # Возвращаем представление
+        return representation
 
 
 # Сериализатор платежей
