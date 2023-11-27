@@ -12,6 +12,7 @@ from .views import (
     LessonUpdateAPIView,
     LessonDestroyAPIView,
     PaymentListAPIView,
+    PaymentCreateAPIView
 )
 
 # Создание экземпляра DefaultRouter
@@ -30,6 +31,6 @@ urlpatterns = [
     path('lessons/delete/<int:pk>/', LessonDestroyAPIView.as_view(), name='lesson_delete'),
 
     path('payments/', PaymentListAPIView.as_view(), name='payment_list'),
-
+    path('payments/create/', PaymentCreateAPIView.as_view(), name='payment_create'),
 ] + router.urls
 

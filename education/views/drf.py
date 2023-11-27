@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics, filters
 from education import serializers
 from education.models import Course, Lesson, Payment
-from education.serializers import PaymentSerializer, SubscriptionSerializer
+from education.serializers import PaymentSerializer, SubscriptionSerializer, PaymentCreateSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from users.models import ModeratorPermissions, IsOwner, Subscription
 
@@ -186,27 +186,6 @@ class PaymentListAPIView(generics.ListAPIView):
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
-    """
-    API для работы с подписками.
-
-    Разрешения:
-    - Создание, редактирование, просмотр и удаление доступны только пользователям.
-
-    Поля:
-    - queryset: Запрос для получения всех подписок.
-    - serializer_class: Класс сериализатора для подписки.
-    - perform_create: Метод для сохранения пользователя при создании.
-
-    Методы:
-    - get_permissions: Переопределенный метод для настройки разрешений в зависимости от действия.
-
-    Запросы:
-    - GET: Получение списка подписок.
-    - POST: Создание новой подписки.
-    - GET (/:id): Получение конкретной подписки.
-    - PUT (/:id): Обновление информации о подписке.
-    - DELETE (/:id): Удаление подписки.
-    """
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
 
@@ -214,3 +193,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+class PaymentCreateAPIView(generics.CreateAPIView):
+    serializer_class = PaymentCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
