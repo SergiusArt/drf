@@ -34,16 +34,39 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_lesson_count(self, obj):
         return obj.lesson_set.count()
 
+
+# Сериализатор платежей
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('user', 'payment_date', 'course', 'lesson', 'amount', 'payment_method')
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+
+
+class PaymentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('user', 'payment_date', 'course', 'lesson', 'amount', 'payment_method')
+
     def to_representation(self, instance):
         # Получаем представление экземпляра с помощью родительского метода
         representation = super().to_representation(instance)
+
+        amount = 0
+        if instance.amount:
+            amount = int(instance.amount * 100)
 
         # Устанавливаем ключ API для stripe
         stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
 
         # Создаем цену для продукта с помощью stripe
         response_price = stripe.Price.create(
-            unit_amount=22222,
+            unit_amount=amount,
             currency="usd",
             recurring={"interval": "year"},
             product="prod_P13LoGhQ2EHrYU",
@@ -58,7 +81,7 @@ class CourseSerializer(serializers.ModelSerializer):
             line_items=[
                 {
                     "price": price_id,
-                    "quantity": 2,
+                    "quantity": 1,
                 },
             ],
             mode="subscription",
@@ -72,16 +95,3 @@ class CourseSerializer(serializers.ModelSerializer):
 
         # Возвращаем представление
         return representation
-
-
-# Сериализатор платежей
-class PaymentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Payment
-        fields = ('user', 'payment_date', 'course', 'lesson', 'amount', 'payment_method')
-
-
-class SubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscription
-        fields = '__all__'
