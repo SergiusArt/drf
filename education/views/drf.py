@@ -4,6 +4,7 @@ from education.models import Course, Lesson, Payment
 from education.serializers import PaymentSerializer, SubscriptionSerializer, PaymentCreateSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from users.models import ModeratorPermissions, IsOwner, Subscription
+from education.tasks import notify_subscribers
 
 
 # ViewSet для модели Course
@@ -190,7 +191,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        course = serializer.save(user=self.request.user)
+        notify_subscribers.delay(course.id)
 
 
 class PaymentCreateAPIView(generics.CreateAPIView):
