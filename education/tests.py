@@ -3,7 +3,6 @@ from django.test import TestCase
 from rest_framework.test import APIClient, APITestCase
 from .models import Course, Lesson
 from users.models import Subscription, User
-from django.urls import reverse
 
 
 # Создаем тестовый случай для курса
